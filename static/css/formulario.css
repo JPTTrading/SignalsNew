@@ -1,0 +1,165 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family:raleway, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.body{
+    background: white;
+}
+
+.inicio{
+    width: 100%;
+	display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2rem;
+    gap: 0.5rem;
+
+}
+
+.contenido{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 40% 20%; 
+    align-items: center;
+    justify-content: center;
+    gap: 3%;
+    padding-top: 3rem;
+
+}
+
+h4{
+    text-align: start;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    font-weight: bolder;
+    font-size: x-large;
+
+}
+
+ul,li{
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+
+}
+
+li{
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    border-bottom: 1px solid #808080;
+}
+
+span{
+    font-size: small;
+
+}
+
+h6{
+    font-size: medium;
+    font-weight: bold;
+}
+
+
+.titulo_entradas{
+    display: flex;
+    justify-content: space-around;  
+    align-items: center;
+    padding-bottom: 1rem;
+    margin: 0;
+    color: #FDC500;
+}
+
+.numero_entradas{
+    color: white;
+    background-color: #FDC500;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 50px;
+    font-size: large;
+    font-weight: bolder;
+}
+
+.tarjeta_entradas{
+    border: 1px solid #80808037;
+    border-radius: 10px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 0.5rem;
+    /* box-shadow:rgba(0,0,0,0.4) 2px 2px 2px; */
+    box-shadow: -0px 0px 0px gray,0px 1px  3px gray;
+}
+
+.form{
+    display: flex;
+    flex-direction: column;
+}
+
+.form-data{
+    display: grid;
+    grid-template-columns:45% 45%;
+    gap: 10%;
+    margin-bottom: 1rem;
+    
+
+}
+
+.form_extra{    
+    display: grid;
+    grid-template-columns:45% 45%;
+    gap: 10%;
+}
+
+.nueva_entrada{
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+}
+
+
+.data{
+    margin-top: 1rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+}
+
+
+
+
+label,input, select{
+    margin-top: 0.5rem;
+}
+
+input, select{
+    height: 1.5rem;
+    border: 0.5px solid gray;
+    border-radius: 5px;
+    padding: 1.8px 8px;
+
+}   
+
+button{
+    width: 100%;
+    padding: 0.5rem 3rem;
+    margin: 1rem 0rem;
+    background: #FDC500;
+    color: black;
+    font-size: medium;
+    font-weight: bolder;
+    border-radius: 5px;
+    border: None;
+    box-shadow: -0px 0px 0px gray,0px 1px  3px gray;
+}
+
+.cambio{
+    position: absolute;
+    left: 80px;
+    top:60px;
+    height: 100px;
+    width: auto;
+    color: #2F2E2E;
+    text-decoration: none;
+}
+

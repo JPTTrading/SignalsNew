@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {%load static%}
+  <script src="https://kit.fontawesome.com/42078eb279.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="{% static 'css/formulario.css' %}" type="text/css">
+  <title>Formulario</title>
+</head>
+<body class="body">
+  <a class="cambio" href="{% url 'view_app' %}" ><i class="fa-solid fa-book fa-xl"></i></a>
+<div class="inicio">
+    <img src="{% static 'img/logo_dark.svg' %}" alt="JP Tactical Trading Logo" width="72" height="57">
+    <!-- <img src="/var/www/html/django_project/Signals/static/img/logo_dark" alt="JP Tactical Trading Logo" width="72" height="57"> -->
+    <h2>Signals send</h2>
+    <p class="lead">First iteration of Tactical Bitacora</p>
+</div>
+  <a class="salida" href="{% url 'salir' %}" ><i class="fa-solid fa-person-running fa-xl"></i></a>
+<div class="contenido">
+
+  <div>
+    <h4 class="nueva_entrada">New Input</h4>
+    <form method="POST" action="{% url 'view_app' %}" >
+      {% csrf_token %}
+      <div class="form_extra">
+
+        <div class="form">
+          <label>Symbol</label>
+          <input type="text" name="SYMBOL" required>
+        </div>
+
+        <div class="form">
+          <label>Side</label>
+          <select name="SIDE" required>
+            <option value="">Choose...</option>
+            <option>Buy</option>
+            <option>Sell</option>
+          </select>
+        </div>
+
+        <div class="form">
+          <label>Entry price</label>
+          <input type="number" name="ENTRY" placeholder="$" step="0.01" required>
+        </div>
+
+        <div class="form">
+          <label>Type</label>
+          <select name="TYPE" required>
+            <option value="">Choose...</option>
+            <option>Entry</option>
+            <option>Partial Take</option>
+            <option>Trailing Stop</option>
+            <option>Addition</option>
+          </select>
+        </div>
+      </div>
+      <h4 class="data">Data</h4>
+      <div class="form-data">
+        <div class="form">
+          <label>Stoploss</label>
+          <input type="number" name="STOP_LOSS" placeholder="$" step="0.01" required>
+        </div>
+        <div class="form">
+          <label>Proportion <span>(Optional)</span></label>
+          <input type="number" name="PORCENTAJE_EJECUTADO" placeholder="% 0.0" step="0.01" required>
+        </div>
+        <div class="form">
+          <label>Target 1</label>
+          <input type="number" name="TARGET_PRICE" placeholder="$" step="0.01" required>
+        </div>
+        <div class="form">
+          <label>Target 2 <span>(Optional)</span></label>
+          <input type="number" placeholder="$">
+        </div>
+      </div>
+      <button type="submit">Confirm new entry</button>
+    </form>
+  </div>
+
+
+  <div>
+    <div class="titulo_entradas">
+      <h4>Last Entrys</h4>
+      <span class="numero_entradas" >3</span>
+    </div>
+    <div class="tarjeta_entradas">
+      <ul>
+        {% for registro in reg %}
+        <li>
+          <div>
+            <h6>{{ registro.SYMBOL }}</h6>
+            <small>{{ registro.SIDE }}</small>
+          </div>
+          <span>{{ registro.ENTRY }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+
+</div>
+</body>
+</html>
+

@@ -1,0 +1,11 @@
+dash
+dash_bootstrap_components
+Django
+django_plotly_dash
+pandas
+plotly
+yfinance
+django-environ
+psycopg2
+gunicorn
+lxml
