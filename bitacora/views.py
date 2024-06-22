@@ -24,6 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 def calculate_take_profit(ENTRY, new_percentage, existing_ENTRY):
     return (((existing_ENTRY * (new_percentage / 100)) / (ENTRY * (new_percentage / 100))) - 1)*100
 
+# nueva funcion para calcular el precio promedio
+
+
+def price_promedio(ENTRY, new_percentage, existing_ENTRY, existing_percentage):
+    total_value = (existing_ENTRY * (existing_percentage / 100)
+                   ) + (ENTRY * (new_percentage / 100))
+    total_percentage = existing_percentage + new_percentage
+    return total_value / (total_percentage / 100)
+
 
 def edit_stop(request):
     print("entramos a la funcion")
@@ -144,6 +153,18 @@ def view_app(request):
                 if TARGET_PRICE is None:
                     TARGET_PRICE = existing_entry.TARGET_PRICE
 
+                # Actualiza ENTRY si el SIDE es el mismo
+                if existing_entry.SIDE == SIDE:
+                    existing_percentage = existing_entry.PORCENTAJE_EJECUTADO
+                    new_percentage = PORCENTAJE_EJECUTADO
+                    new_entry = price_promedio(
+                        ENTRY, new_percentage, existing_entry.ENTRY, existing_percentage)
+                    # new_entry = ((existing_percentage / 100) * existing_entry.ENTRY +
+                    #              (new_percentage / 100) * ENTRY) / ((existing_percentage / 100) + (new_percentage / 100))
+                    existing_entry.ENTRY = new_entry
+                    existing_entry.PORCENTAJE_EJECUTADO += new_percentage
+                    existing_entry.save()
+
                 # Verifica el SIDE de la nueva operación y ajusta el porcentaje acumulado
                 if existing_entry.SIDE != SIDE:
                     new_percent_acum = round(
@@ -160,16 +181,6 @@ def view_app(request):
                 # Verifica si se alcanzó el 100% de ejecución en el Bitacora_Principal
                 if existing_entry.PORCENTAJE_ACUMULADO <= 0:
                     existing_entry.TRADE_CLOSE = timezone.now().date()
-                    existing_entry.save()
-
-                # Actualiza ENTRY si el SIDE es el mismo
-                if existing_entry.SIDE == SIDE:
-                    existing_percentage = existing_entry.PORCENTAJE_EJECUTADO
-                    new_percentage = PORCENTAJE_EJECUTADO
-                    new_entry = ((existing_percentage / 100) * existing_entry.ENTRY +
-                                 (new_percentage / 100) * ENTRY) / ((existing_percentage / 100) + (new_percentage / 100))
-                    existing_entry.ENTRY = new_entry
-                    existing_entry.PORCENTAJE_EJECUTADO += new_percentage
                     existing_entry.save()
 
                 # Registra en Historial_Bitacora
