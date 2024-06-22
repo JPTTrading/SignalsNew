@@ -61,4 +61,21 @@ body{
 }
 
 
+.switch-container{
+    position: absolute;
+    right: 80px;
+    top:60px;
+}
+
+.switch{
+    text-align: center;
+}
+
+.form-check-label{
+    margin: 0;
+    color: white;
+    font-size: medium;
+    font-weight: bold;
+}
+
 

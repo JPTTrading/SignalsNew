@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
-    # 'django.contrib.staticfiles',
+    'django.contrib.staticfiles',
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     'bitacora'
 ]
@@ -88,16 +88,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'signals.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': 'tactical.sqlite3',
-#    }
-# }
+# Configuraciones para las sesiones
+SESSION_COOKIE_AGE = 10 * 60  # 10 minutos
+# Actualizar sesión en cada petición del usuario
+SESSION_SAVE_EVERY_REQUEST = True
 
 
 DATABASES = {
@@ -164,19 +158,11 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
-# STATICFILES_DIRS = [BASE_DIR / "bitacora/static"]
+STATICFILES_DIRS = [BASE_DIR / "bitacora/static"]
 STATIC_ROOT = BASE_DIR / "static"
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.office365.com'
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = 'juanbedoya@ttrading.co'
-# EMAIL_HOST_PASSWORD = 'TraderBed0ya'
-# EMAIL_USE_TLS = True
-# DEFAULT_FROM_EMAIL = 'juanbedoya@ttrading.co'

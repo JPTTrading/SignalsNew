@@ -10,16 +10,18 @@
   <title>Formulario</title>
 </head>
 <body class="body">
+
   <a class="cambio" href="{% url 'view_app' %}" ><i class="fa-solid fa-book fa-xl"></i></a>
-<div class="inicio">
+  <div class="inicio">
     <img src="{% static 'img/logo_dark.svg' %}" alt="JP Tactical Trading Logo" width="72" height="57">
     <!-- <img src="/var/www/html/django_project/Signals/static/img/logo_dark" alt="JP Tactical Trading Logo" width="72" height="57"> -->
     <h2>Signals send</h2>
     <p class="lead">First iteration of Tactical Bitacora</p>
-</div>
+  </div>
   <a class="salida" href="{% url 'salir' %}" ><i class="fa-solid fa-person-running fa-xl"></i></a>
-<div class="contenido">
 
+
+<div class="contenido">
   <div>
     <h4 class="nueva_entrada">New Input</h4>
     <form method="POST" action="{% url 'view_app' %}" >
@@ -60,20 +62,20 @@
       <div class="form-data">
         <div class="form">
           <label>Stoploss</label>
-          <input type="number" name="STOP_LOSS" placeholder="$" step="0.01" required>
+          <input type="number" name="STOP_LOSS" placeholder="$" step="0.01">
         </div>
         <div class="form">
           <label>Proportion <span>(Optional)</span></label>
           <input type="number" name="PORCENTAJE_EJECUTADO" placeholder="% 0.0" step="0.01" required>
         </div>
         <div class="form">
-          <label>Target 1</label>
-          <input type="number" name="TARGET_PRICE" placeholder="$" step="0.01" required>
+          <label>Target</label>
+          <input type="number" name="TARGET_PRICE" placeholder="$" step="0.01">
         </div>
-        <div class="form">
+        {% comment %} <div class="form">
           <label>Target 2 <span>(Optional)</span></label>
           <input type="number" placeholder="$">
-        </div>
+        </div> {% endcomment %}
       </div>
       <button type="submit">Confirm new entry</button>
     </form>
@@ -100,6 +102,85 @@
     </div>
   </div>
 
+<div>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form">
+      <label>Symbol data</label>
+
+      <select id="symbol-select">
+        <option value="">Choose...</option>
+        {% for bitacora in bitacoras %}
+              <option 
+      data-trade-date="{{ bitacora.TRADE_DATE }}"
+      data-trade-close="{{ bitacora.TRADE_CLOSE }}"
+      data-side="{{ bitacora.SIDE }}"
+      data-entry="{{ bitacora.ENTRY }}"
+      data-stop-loss="{{ bitacora.STOP_LOSS }}"
+
+      data-target-price="{{ bitacora.TARGET_PRICE }}"
+      data-porcentaje-acumulado="{{ bitacora.PORCENTAJE_ACUMULADO }}"
+      data-porcentaje-ejecutado="{{ bitacora.PORCENTAJE_EJECUTADO }}"
+      value="{{ bitacora.SYMBOL }}"
+    >
+      {{ bitacora.SYMBOL }}
+    </option>
+        {% endfor %}
+      </select>
+      <div class="form">
+        <label id="selected-symbol">{{ Symbol }}</label>
+        <label id="selected-trade-date">{{ trade_date }}</label>
+        <label id="selected-entry">{{ entry }}</label>
+        <label id="selected-side">{{ side }}</label>
+        <label id="selected-trade-close">{{ trade_close }}</label>
+        <label id="selected-stop-loss">{{ stop_loss }}</label>
+        <label id="selected-target-price">{{ target_price }}</label>
+        {% comment %} <label id="selected-porcentaje-acumulado">{{ porcentaje_acumulado }}</label>
+        <label id="selected-porcentaje-ejecutado">{{ porcentaje_ejecutado }}</label> {% endcomment %}
+      </div>
+    </div>
+  </form>
+  <div class="botones_edit">
+    <form id method="POST" action="{% url 'edit_stop' %}">
+      {% csrf_token %}
+    <div>
+      <input id="selected-symbol-edit" name="SYMBOL_EDIT">{{ Symbol }}</input>
+    </div> 
+      <label>Edit stop</label>
+    <div class="edits">
+      <input  name="STOP_LOSS_EDIT" type="number" placeholder="$" step="0.01">
+      <button class="button_edit" type="submit">edit stop</button>
+    </div>
+    <label>Edit target</label>
+    <div class="edits">
+      <input name="TARGET_PRICE_EDIT" type="number" placeholder="$" step="0.01">
+      <button  class="button_edit" type="submit">edit target</button>
+    </div>
+  </form>
+</div>
+</div>
+
+  <script>
+    document.querySelector('#symbol-select').addEventListener('change', function(event) {
+        var selectedOption = event.target.options[event.target.selectedIndex];
+        document.querySelector('#selected-symbol-edit').textContent = selectedOption.value;
+        document.querySelector('#selected-symbol').textContent = 'Symbol: ' + selectedOption.value;
+        document.querySelector('#selected-entry').textContent = 'Entry: ' + selectedOption.dataset.entry;
+        document.querySelector('#selected-side').textContent = 'Side: ' + selectedOption.dataset.side;
+        // Agrega aquí más líneas para actualizar otros labels con los datos recibidos
+        document.querySelector('#selected-trade-date').textContent = 'Trade Date: ' + selectedOption.dataset.tradeDate;
+        document.querySelector('#selected-trade-close').textContent = 'Trade Close: ' + selectedOption.dataset.tradeClose;
+        document.querySelector('#selected-stop-loss').textContent = 'Stop Loss: ' + selectedOption.dataset.stopLoss;
+
+        document.querySelector('#selected-target-price').textContent = 'Target Price: ' + selectedOption.dataset.targetPrice;
+        document.querySelector('#selected-porcentaje-acumulado').textContent = 'Porcentaje Acumulado: ' + selectedOption.dataset.porcentajeAcumulado;
+        document.querySelector('#selected-porcentaje-ejecutado').textContent = 'Porcentaje Ejecutado: ' + selectedOption.dataset.porcentajeEjecutado;
+    });
+    document.querySelector('#symbol-select').addEventListener('change', function(event) {
+      var selectedOption = event.target.options[event.target.selectedIndex];
+      document.querySelector('#selected-symbol-edit').value = selectedOption.value;
+  });
+  </script>
 
 </div>
 </body>

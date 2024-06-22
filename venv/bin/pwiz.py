@@ -1,4 +1,4 @@
-#!/Users/alejandrobedoya/Documents/GitHub/Signals/venv/bin/python3.12
+#!/Users/alejandrobedoya/Documents/GitHub/Signals/venv/bin/python3
 
 import datetime
 import os

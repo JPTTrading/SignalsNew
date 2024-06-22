@@ -15,7 +15,6 @@
     align-items: center;
     padding-top: 2rem;
     gap: 0.5rem;
-
 }
 
 .contenido{
@@ -26,7 +25,6 @@
     justify-content: center;
     gap: 3%;
     padding-top: 3rem;
-
 }
 
 h4{
@@ -103,8 +101,6 @@ h6{
     grid-template-columns:45% 45%;
     gap: 10%;
     margin-bottom: 1rem;
-    
-
 }
 
 .form_extra{    
@@ -118,15 +114,11 @@ h6{
     padding-top: 1rem;
 }
 
-
 .data{
     margin-top: 1rem;
     padding-bottom: 1rem;
     padding-top: 1rem;
 }
-
-
-
 
 label,input, select{
     margin-top: 0.5rem;
@@ -137,7 +129,6 @@ input, select{
     border: 0.5px solid gray;
     border-radius: 5px;
     padding: 1.8px 8px;
-
 }   
 
 button{
@@ -163,3 +154,12 @@ button{
     text-decoration: none;
 }
 
+.salida{
+    position: absolute;
+    right:80px;
+    top:60px;
+    height: 100px;
+    width: auto;
+    color: #2F2E2E;
+    text-decoration: none;
+}
