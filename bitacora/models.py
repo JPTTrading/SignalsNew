@@ -11,25 +11,30 @@ import yfinance as yf
 # Create your models here.
 
 
+class Meta:
+    db_table = 'bitacora_bitacora_principal'
+
+
 class Bitacora_Principal(models.Model):
     uuid = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    TRADE_DATE = models.DateTimeField(
+    trade_date = models.DateTimeField(
         default=date.today().strftime('%Y-%m-%d'))
-    TRADE_CLOSE = models.DateField(default=None, blank=True, null=True)
-    SYMBOL = models.CharField(max_length=255, default=None)
-    SIDE = models.CharField(max_length=4, default=None)  # BUY or SELL
-    ENTRY = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    STOP_LOSS = models.DecimalField(
+    trade_close = models.DateField(default=None, blank=True, null=True)
+    symbol = models.CharField(max_length=255, default=None)
+    side = models.CharField(max_length=4, default=None)  # BUY or SELL
+    entry = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    stop_loss = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
-    LAST = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    TARGET_PRICE = models.DecimalField(
+    last_price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0)
+    target_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
-    PORCENTAJE_ACUMULADO = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0.00)  # Campo para el porcentaje ejecutado
+    porcentaje_acumulado = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0.00, null=True)  # Campo para el porcentaje ejecutado
     # Otras columnas necesarias
-    PORCENTAJE_EJECUTADO = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0.00)
+    porcentaje_ejecutado = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0.00, null=True)
 
     # def calcular_take_profit(self, new_trade_date, new_take_profit_entry, new_percentage, new_stop_loss=None, new_last=None, new_target_price=None):
     #     # Realizar el cálculo
@@ -53,21 +58,27 @@ class Bitacora_Principal(models.Model):
 
 
 class Historial_Bitacora(models.Model):
-    BITACORA_PRINCIPAL = models.ForeignKey(
-        Bitacora_Principal, on_delete=models.CASCADE)
-    TRADE_DATE = models.DateTimeField(
-        default=date.today().strftime('%Y-%m-%d'))
-    SYMBOL = models.CharField(max_length=255, default=None)
-    SIDE = models.CharField(max_length=4, default=None)  # BUY or SELL
-    ENTRY = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    STOP_LOSS = models.DecimalField(
+    id = models.AutoField(primary_key=True)
+    bitacora_principal = models.ForeignKey(
+        Bitacora_Principal,  # Modelo al que hace referencia
+        on_delete=models.CASCADE,  # Qué hacer cuando se borra el objeto relacionado
+        # Nombre opcional para acceder a este conjunto de historiales desde un Bitacora_Principal
+        related_name='historial',
+        db_column='bitacora_principal_uuid',  # Nombre de la columna en la base de datos
+    )
+    trade_date = models.DateTimeField(auto_now_add=True)
+    symbol = models.CharField(max_length=255, default=None)
+    side = models.CharField(max_length=4, default=None)  # BUY or SELL
+    entry = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    stop_loss = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0)
-    LAST = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    TARGET_PRICE = models.DecimalField(
+    last_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0)
-    PORCENTAJE_EJECUTADO = models.DecimalField(
+    target_price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0)
+    porcentaje_ejecutado = models.DecimalField(
         max_digits=5, decimal_places=2, default=0.00)
-    PROFIT = models.DecimalField(
+    profit = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0)
     type = models.CharField(max_length=255, default=None,
                             null=True)  # Tipo de operación

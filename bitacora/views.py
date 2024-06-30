@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 import pandas as pd
 from django.core.cache import cache
@@ -21,15 +20,15 @@ from django.db import transaction
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def calculate_take_profit(ENTRY, new_percentage, existing_ENTRY):
-    return (((existing_ENTRY * (new_percentage / 100)) / (ENTRY * (new_percentage / 100))) - 1)*100
+def calculate_take_profit(entry, new_percentage, existing_entry):
+    return (((existing_entry * (new_percentage / 100)) / (entry * (new_percentage / 100))) - 1)*100
 
 # nueva funcion para calcular el precio promedio
 
 
-def price_promedio(ENTRY, new_percentage, existing_ENTRY, existing_percentage):
-    total_value = (existing_ENTRY * (existing_percentage / 100)
-                   ) + (ENTRY * (new_percentage / 100))
+def price_promedio(entry, new_percentage, existing_entry, existing_percentage):
+    total_value = (existing_entry * (existing_percentage / 100)
+                   ) + (entry * (new_percentage / 100))
     total_percentage = existing_percentage + new_percentage
     return total_value / (total_percentage / 100)
 
@@ -42,72 +41,72 @@ def edit_stop(request):
             with transaction.atomic():
 
                 # tomamos los datos que llegan del formulario
-                STOP_LOSS_EDIT = request.POST['STOP_LOSS_EDIT']
-                TARGET_PRICE_EDIT = request.POST['TARGET_PRICE_EDIT']
+                stop_loss_edit = request.POST['stop_loss_edit']
+                target_price_edit = request.POST['target_price_edit']
 
-                if STOP_LOSS_EDIT and STOP_LOSS_EDIT.strip():
-                    STOP_LOSS_EDIT = Decimal(STOP_LOSS_EDIT)
+                if stop_loss_edit and stop_loss_edit.strip():
+                    stop_loss_edit = Decimal(stop_loss_edit)
 
                     # Obtén los datos del formulario
-                    SYMBOL_EDIT = request.POST['SYMBOL_EDIT'].upper()
+                    symbol_edit = request.POST['symbol_edit'].lower()
 
                     # Verifica si el símbolo ya existe en la tabla BitacoraPrincipal
                     existing_entry = Bitacora_Principal.objects.filter(
-                        SYMBOL=SYMBOL_EDIT, TRADE_CLOSE__isnull=True).first()
+                        symbol=symbol_edit, trade_close__isnull=True).first()
 
                     if existing_entry:
-                        existing_entry.STOP_LOSS = STOP_LOSS_EDIT
-                        existing_entry.TARGET_PRICE = existing_entry.TARGET_PRICE
+                        existing_entry.stop_loss = stop_loss_edit
+                        existing_entry.target_price = existing_entry.target_price
                         existing_entry.save()
 
                         historial_data = Historial_Bitacora(
-                            BITACORA_PRINCIPAL=existing_entry,
-                            SYMBOL=SYMBOL_EDIT,
-                            SIDE=existing_entry.SIDE,
-                            ENTRY=existing_entry.ENTRY,
+                            bitacora_principal=existing_entry,
+                            symbol=symbol_edit,
+                            side=existing_entry.side,
+                            entry=existing_entry.entry,
                             type="EDIT STOP LOSS",
-                            STOP_LOSS=STOP_LOSS_EDIT,
-                            TARGET_PRICE=existing_entry.TARGET_PRICE,
+                            stop_loss=stop_loss_edit,
+                            target_price=existing_entry.target_price,
                             # PORCENTAJE_EJECUTADO=existing_entry.PORCENTAJE_ACUMULADO,
-                            PORCENTAJE_EJECUTADO=0,
+                            porcentaje_ejecutado=0,
                         )
                         historial_data.save()
                     else:
                         print("No se encontró el símbolo en la bitácora principal")
 
-                if TARGET_PRICE_EDIT and TARGET_PRICE_EDIT.strip():
-                    TARGET_PRICE_EDIT = Decimal(TARGET_PRICE_EDIT)
+                if target_price_edit and target_price_edit.strip():
+                    target_price_edit = Decimal(target_price_edit)
 
                     # Obtén los datos del formulario
-                    SYMBOL_EDIT = request.POST['SYMBOL_EDIT'].upper()
+                    symbol_edit = request.POST['symbol_edit'].lower()
 
                     # Verifica si el símbolo ya existe en la tabla BitacoraPrincipal
                     existing_entry = Bitacora_Principal.objects.filter(
-                        SYMBOL=SYMBOL_EDIT, TRADE_CLOSE__isnull=True).first()
+                        symbol=symbol_edit, trade_close__isnull=True).first()
 
                     if existing_entry:
-                        existing_entry.STOP_LOSS = existing_entry.STOP_LOSS
-                        existing_entry.TARGET_PRICE = TARGET_PRICE_EDIT
+                        existing_entry.stop_loss = existing_entry.stop_loss
+                        existing_entry.target_price = target_price_edit
                         existing_entry.save()
 
                         historial_data = Historial_Bitacora(
-                            BITACORA_PRINCIPAL=existing_entry,
-                            SYMBOL=SYMBOL_EDIT,
-                            SIDE=existing_entry.SIDE,
-                            ENTRY=existing_entry.ENTRY,
+                            bitacora_principal=existing_entry,
+                            symbol=symbol_edit,
+                            side=existing_entry.side,
+                            entry=existing_entry.entry,
                             type="EDIT TARGET PRICE",
-                            STOP_LOSS=existing_entry.STOP_LOSS,
-                            TARGET_PRICE=TARGET_PRICE_EDIT,
+                            stop_loss=existing_entry.stop_loss,
+                            target_price=target_price_edit,
                             # PORCENTAJE_EJECUTADO=existing_entry.PORCENTAJE_ACUMULADO,
-                            PORCENTAJE_EJECUTADO=0,
+                            porcentaje_ejecutado=0,
                         )
                         historial_data.save()
                     else:
                         print("No se encontró el símbolo en la bitácora principal")
             data = convertir()
-            dataHis = convertirHistoria()
+            data_his = convertir_historia()
             cache.set('bit', data)
-            cache.set('his', dataHis)
+            cache.set('his', data_his)
         return redirect('form')
 
     except Exception as e:
@@ -124,12 +123,12 @@ def view_app(request):
     try:
         if request.method == "POST":
             # Obtén los datos del formulario
-            SYMBOL = request.POST['SYMBOL'].upper()
-            SIDE = request.POST['SIDE']
-            ENTRY = Decimal(request.POST['ENTRY'])
-            type = request.POST['TYPE']
-            PORCENTAJE_EJECUTADO = Decimal(
-                request.POST['PORCENTAJE_EJECUTADO'])
+            symbol = request.POST['symbol'].lower()
+            side = request.POST['side']
+            entry = Decimal(request.POST['entry'])
+            type = request.POST['type']
+            porcentaje_ejecutado = Decimal(
+                request.POST['porcentaje_ejecutado'])
 
             # Función para convertir a Decimal o devolver None si está vacío
             def to_decimal(value):
@@ -138,105 +137,105 @@ def view_app(request):
                 except (InvalidOperation, ValueError):
                     return None
 
-            STOP_LOSS = to_decimal(request.POST.get('STOP_LOSS', '').strip())
-            TARGET_PRICE = to_decimal(
-                request.POST.get('TARGET_PRICE', '').strip())
+            stop_loss = to_decimal(request.POST.get('stop_loss', '').strip())
+            target_price = to_decimal(
+                request.POST.get('target_price', '').strip())
 
             # Verifica si el símbolo ya existe en la tabla BitacoraPrincipal
             existing_entry = Bitacora_Principal.objects.filter(
-                SYMBOL=SYMBOL, TRADE_CLOSE__isnull=True).first()
+                symbol=symbol, trade_close__isnull=True).first()
 
             if existing_entry:
                 # Si no se proporcionan nuevos valores, usa los existentes
-                if STOP_LOSS is None:
-                    STOP_LOSS = existing_entry.STOP_LOSS
-                if TARGET_PRICE is None:
-                    TARGET_PRICE = existing_entry.TARGET_PRICE
+                if stop_loss is None:
+                    stop_loss = existing_entry.stop_loss
+                if target_price is None:
+                    target_price = existing_entry.target_price
 
-                # Actualiza ENTRY si el SIDE es el mismo
-                if existing_entry.SIDE == SIDE:
-                    existing_percentage = existing_entry.PORCENTAJE_EJECUTADO
-                    new_percentage = PORCENTAJE_EJECUTADO
+                # Actualiza entry si el side es el mismo
+                if existing_entry.side == side:
+                    existing_percentage = existing_entry.porcentaje_ejecutado
+                    new_percentage = porcentaje_ejecutado
                     new_entry = price_promedio(
-                        ENTRY, new_percentage, existing_entry.ENTRY, existing_percentage)
+                        entry, new_percentage, existing_entry.entry, existing_percentage)
                     # new_entry = ((existing_percentage / 100) * existing_entry.ENTRY +
                     #              (new_percentage / 100) * ENTRY) / ((existing_percentage / 100) + (new_percentage / 100))
-                    existing_entry.ENTRY = new_entry
-                    existing_entry.PORCENTAJE_EJECUTADO += new_percentage
+                    existing_entry.entry = new_entry
+                    existing_entry.porcentaje_ejecutado += new_percentage
                     existing_entry.save()
 
-                # Verifica el SIDE de la nueva operación y ajusta el porcentaje acumulado
-                if existing_entry.SIDE != SIDE:
+                # Verifica el side de la nueva operación y ajusta el porcentaje acumulado
+                if existing_entry.side != side:
                     new_percent_acum = round(
-                        existing_entry.PORCENTAJE_ACUMULADO * (1 - (PORCENTAJE_EJECUTADO / 100)), 2)
+                        existing_entry.porcentaje_acumulado * (1 - (porcentaje_ejecutado / 100)), 2)
                 else:
                     new_percent_acum = round(
-                        existing_entry.PORCENTAJE_ACUMULADO * (1 + PORCENTAJE_EJECUTADO / 100), 2)
+                        existing_entry.porcentaje_acumulado * (1 + porcentaje_ejecutado / 100), 2)
 
-                existing_entry.PORCENTAJE_ACUMULADO = new_percent_acum
-                existing_entry.STOP_LOSS = STOP_LOSS
-                existing_entry.TARGET_PRICE = TARGET_PRICE
+                existing_entry.porcentaje_acumulado = new_percent_acum
+                existing_entry.stop_loss = stop_loss
+                existing_entry.target_price = target_price
                 existing_entry.save()
 
                 # Verifica si se alcanzó el 100% de ejecución en el Bitacora_Principal
-                if existing_entry.PORCENTAJE_ACUMULADO <= 0:
-                    existing_entry.TRADE_CLOSE = timezone.now().date()
+                if existing_entry.porcentaje_acumulado <= 0:
+                    existing_entry.trade_close = timezone.now().date()
                     existing_entry.save()
 
                 # Registra en Historial_Bitacora
                 historial_data = Historial_Bitacora(
-                    BITACORA_PRINCIPAL=existing_entry,
-                    SYMBOL=SYMBOL,
-                    SIDE=SIDE,
-                    ENTRY=ENTRY,
+                    bitacora_principal=existing_entry,
+                    symbol=symbol,
+                    side=side,
+                    entry=entry,
                     type=type,
-                    STOP_LOSS=STOP_LOSS,
-                    TARGET_PRICE=TARGET_PRICE,
-                    PORCENTAJE_EJECUTADO=PORCENTAJE_EJECUTADO,
+                    stop_loss=stop_loss,
+                    target_price=target_price,
+                    porcentaje_ejecutado=porcentaje_ejecutado,
                 )
 
-                # Calcula el profit si el SIDE es diferente
-                if existing_entry.SIDE != SIDE:
-                    existing_ENTRY = existing_entry.ENTRY
-                    PROFIT = calculate_take_profit(
-                        existing_ENTRY, PORCENTAJE_EJECUTADO, ENTRY)
-                    historial_data.PROFIT = PROFIT
+                # Calcula el profit si el side es diferente
+                if existing_entry.side != side:
+                    existing_entry = existing_entry.entry
+                    profit = calculate_take_profit(
+                        existing_entry, porcentaje_ejecutado, entry)
+                    historial_data.profit = profit
 
                 historial_data.save()
             else:
                 # Si el símbolo no existe en Bitacora_Principal, crea un nuevo registro
                 new_bitacora = Bitacora_Principal(
-                    SYMBOL=SYMBOL,
-                    SIDE=SIDE,
-                    ENTRY=ENTRY,
-                    STOP_LOSS=STOP_LOSS if STOP_LOSS is not None else Decimal(
+                    symbol=symbol,
+                    side=side,
+                    entry=entry,
+                    stop_loss=stop_loss if stop_loss is not None else Decimal(
                         '0.00'),  # Asigna valor predeterminado
-                    TARGET_PRICE=TARGET_PRICE if TARGET_PRICE is not None else Decimal(
+                    target_price=target_price if target_price is not None else Decimal(
                         '0.00'),  # Asigna valor predeterminado
-                    PORCENTAJE_ACUMULADO=100
+                    porcentaje_acumulado=100
                 )
                 new_bitacora.save()
 
                 # Luego, crea un registro en HistorialBitacora relacionándolo con el nuevo BitacoraPrincipal
                 historial_data = Historial_Bitacora(
-                    BITACORA_PRINCIPAL=new_bitacora,
-                    SYMBOL=SYMBOL,
-                    SIDE=SIDE,
+                    bitacora_principal=new_bitacora,
+                    symbol=symbol,
+                    side=side,
                     type=type,
-                    ENTRY=ENTRY,
-                    STOP_LOSS=STOP_LOSS if STOP_LOSS is not None else Decimal(
+                    entry=entry,
+                    stop_loss=stop_loss if stop_loss is not None else Decimal(
                         '0.00'),  # Asigna valor predeterminado
-                    TARGET_PRICE=TARGET_PRICE if TARGET_PRICE is not None else Decimal(
+                    target_price=target_price if target_price is not None else Decimal(
                         '0.00'),  # Asigna valor predeterminado
-                    PORCENTAJE_EJECUTADO=PORCENTAJE_EJECUTADO,
+                    porcentaje_ejecutado=porcentaje_ejecutado,
                 )
                 historial_data.save()
 
             # Actualiza los datos en caché y envía el correo
             data = convertir()
-            dataHis = convertirHistoria()
+            data_his = convertir_historia()
             cache.set('bit', data)
-            cache.set('his', dataHis)
+            cache.set('his', data_his)
             data_email(request)
 
         return render(request, 'bitacora.html')
@@ -249,7 +248,7 @@ def view_app(request):
 
 
 def convertir():
-    objs = Bitacora_Principal.objects.all().order_by('TRADE_DATE')
+    objs = Bitacora_Principal.objects.all().order_by('trade_date')
 
     # Crea una lista para almacenar los resultados individuales
     resultados = []
@@ -257,18 +256,18 @@ def convertir():
     for obj in objs:
         # Crea un diccionario para cada objeto y agrega los atributos que necesitas
         dict_resultado = {}
-        dict_resultado['UUID'] = str(obj.uuid)
-        dict_resultado['TRADE_DATE'] = obj.TRADE_DATE.strftime('%d-%m-%Y')
-        dict_resultado['TRADE_CLOSE'] = obj.TRADE_CLOSE
-        dict_resultado['SYMBOL'] = obj.SYMBOL
-        dict_resultado['SIDE'] = obj.SIDE
-        dict_resultado['ENTRY'] = str(obj.ENTRY)  # Serializa Decimal a cadena
-        dict_resultado['STOP_LOSS'] = str(
-            obj.STOP_LOSS)  # Serializa Decimal a cadena
-        dict_resultado['TARGET_PRICE'] = str(
-            obj.TARGET_PRICE)  # Serializa Decimal a cadena
-        dict_resultado['PORCENTAJE_ACUMULADO'] = str(
-            obj.PORCENTAJE_ACUMULADO)  # Serializa Decimal a cadena
+        dict_resultado['uuid'] = str(obj.uuid)
+        dict_resultado['trade_date'] = obj.trade_date.strftime('%d-%m-%Y')
+        dict_resultado['trade_close'] = obj.trade_close
+        dict_resultado['symbol'] = obj.symbol
+        dict_resultado['side'] = obj.side
+        dict_resultado['entry'] = str(obj.entry)  # Serializa Decimal a cadena
+        dict_resultado['stop_loss'] = str(
+            obj.stop_loss)  # Serializa Decimal a cadena
+        dict_resultado['target_price'] = str(
+            obj.target_price)  # Serializa Decimal a cadena
+        dict_resultado['porcentaje_acumulado'] = str(
+            obj.porcentaje_acumulado)  # Serializa Decimal a cadena
         # Agrega más atributos según sea necesario
         resultados.append(dict_resultado)
         cache.set('bit', resultados)
@@ -277,60 +276,60 @@ def convertir():
     return resultados
 
 
-def convertirHistoria():
-    objsHistorial = Historial_Bitacora.objects.order_by('TRADE_DATE').all()
+def convertir_historia():
+    objs_historial = Historial_Bitacora.objects.order_by('trade_date').all()
 
-    resultadosHistorial = []
+    resultados_historial = []
 
-    for objH in objsHistorial:
+    for obj_h in objs_historial:
         # Crea un diccionario para cada objeto y agrega los atributos que necesitas
-        dict_resultadoHistorial = {}
-        dict_resultadoHistorial['UUID'] = str(objH.BITACORA_PRINCIPAL.uuid)
-        dict_resultadoHistorial['TRADE_DATE'] = objH.TRADE_DATE.strftime(
+        dict_resultado_historial = {}
+        dict_resultado_historial['uuid'] = str(obj_h.bitacora_principal.uuid)
+        dict_resultado_historial['trade_date'] = obj_h.trade_date.strftime(
             '%d-%m-%Y')
-        dict_resultadoHistorial['SYMBOL'] = objH.SYMBOL
-        dict_resultadoHistorial['SIDE'] = objH.SIDE
-        dict_resultadoHistorial['ENTRY'] = str(
-            objH.ENTRY)  # Serializa Decimal a cadena
-        dict_resultadoHistorial['STOP_LOSS'] = str(
-            objH.STOP_LOSS)  # Serializa Decimal a cadena
-        dict_resultadoHistorial['TARGET_PRICE'] = str(
-            objH.TARGET_PRICE)  # Serializa Decimal a cadena
+        dict_resultado_historial['symbol'] = obj_h.symbol
+        dict_resultado_historial['side'] = obj_h.side
+        dict_resultado_historial['entry'] = str(
+            obj_h.entry)  # Serializa Decimal a cadena
+        dict_resultado_historial['stop_loss'] = str(
+            obj_h.stop_loss)  # Serializa Decimal a cadena
+        dict_resultado_historial['target_price'] = str(
+            obj_h.target_price)  # Serializa Decimal a cadena
         # Agrega más atributos según sea necesario
-        dict_resultadoHistorial['PROFIT'] = str(
-            objH.PROFIT)
-        dict_resultadoHistorial['PORCENTAJE_EJECUTADO'] = str(
-            objH.PORCENTAJE_EJECUTADO)
-        resultadosHistorial.append(dict_resultadoHistorial)
-        cache.set('his', resultadosHistorial)
+        dict_resultado_historial['profit'] = str(
+            obj_h.profit)
+        dict_resultado_historial['porcentaje_ejecutado'] = str(
+            obj_h.porcentaje_ejecutado)
+        resultados_historial.append(dict_resultado_historial)
+        cache.set('his', resultados_historial)
 
-    return resultadosHistorial
+    return resultados_historial
 
 
 convertir()
-convertirHistoria()
+convertir_historia()
 
 
-def convertirRegistros():
-    registros = Bitacora_Principal.objects.order_by('TRADE_DATE')[:3]
+def convertir_registros():
+    registros = Bitacora_Principal.objects.order_by('trade_date')[:3]
 
-    resultadosRegistros = []
+    resultados_registros = []
 
     for registro in registros:
-        dict_resultadosRegistros = {}
+        dict_resultados_registros = {}
 
-        dict_resultadosRegistros['SYMBOL'] = registro.SYMBOL
-        dict_resultadosRegistros['SIDE'] = registro.SIDE
-        dict_resultadosRegistros['ENTRY'] = str(registro.ENTRY)
+        dict_resultados_registros['symbol'] = registro.symbol
+        dict_resultados_registros['side'] = registro.side
+        dict_resultados_registros['entry'] = str(registro.entry)
 
-        resultadosRegistros.append(dict_resultadosRegistros)
+        resultados_registros.append(dict_resultados_registros)
 
-        cache.set('reg', resultadosRegistros)
+        cache.set('reg', resultados_registros)
 
-    return resultadosRegistros
+    return resultados_registros
 
 
-convertirRegistros()
+convertir_registros()
 
 
 def data_email(request):
@@ -341,23 +340,23 @@ def data_email(request):
 
     if request.method == "POST":
         # Obtén los datos del formulario
-        SYMBOL = request.POST.get('SYMBOL')
-        SIDE = request.POST.get('SIDE')
-        ENTRY = str(request.POST.get('ENTRY'))
-        type = request.POST.get('TYPE')
-        STOP_LOSS = str(request.POST.get('STOP_LOSS'))
-        TARGET_PRICE = str(request.POST.get('TARGET_PRICE'))
-        PORCENTAJE_EJECUTADO = str(request.POST.get('PORCENTAJE_EJECUTADO'))
+        symbol = request.POST.get('symbol')
+        side = request.POST.get('side')
+        entry = str(request.POST.get('entry'))
+        type = request.POST.get('type')
+        stop_loss = str(request.POST.get('stop_loss'))
+        target_price = str(request.POST.get('target_price'))
+        porcentaje_ejecutado = str(request.POST.get('porcentaje_ejecutado'))
 
         # Crea un diccionario con los datos del formulario
         data = {
-            'SYMBOL': SYMBOL,
-            'SIDE': SIDE,
-            'ENTRY': ENTRY,
-            'TYPE': type,
-            'STOP_LOSS': STOP_LOSS,
-            'TARGET_PRICE': TARGET_PRICE,
-            'PORCENTAJE_EJECUTADO': PORCENTAJE_EJECUTADO,
+            'symbol': symbol,
+            'side': side,
+            'entry': entry,
+            'type': type,
+            'stop_loss': stop_loss,
+            'target_price': target_price,
+            'porcentaje_ejecutado': porcentaje_ejecutado,
         }
         email(data, 'jpttapps@gmail.com', 'Nuevo trade')
 
@@ -388,21 +387,21 @@ def email(data, destinatario, asunto):
 @login_required
 def form(request):
     bitacoras = Bitacora_Principal.objects.filter(
-        TRADE_CLOSE__isnull=True).order_by('TRADE_DATE')
+        trade_close__isnull=True).order_by('trade_date')
     # bitacoras = cache.get('bit')
-    reg = convertirRegistros()
+    reg = convertir_registros()
     cache.set('reg', reg)
     return render(request, 'form.html', {'reg': reg, 'bitacoras': bitacoras})
 
 
 def get_symbol_details(request):
-    symbol = request.GET.get('Symbol', None)
+    symbol = request.GET.get('symbol', None)
     if symbol:
         bitacoras = cache.get('bit')
         for bitacora in bitacoras:
-            if bitacora.SYMBOL == symbol:
+            if bitacora.symbol == symbol:
                 return JsonResponse({
-                    'ENTRY': bitacora.ENTRY,
+                    'entry': bitacora.entry,
                     # Agrega aquí cualquier otro detalle que quieras devolver
                 })
     return JsonResponse({'error': 'Symbol not found'}, status=404)
