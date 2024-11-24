@@ -1,7 +1,17 @@
 *{
     margin: 0;
     padding: 0;
-    font-family:raleway, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family:'Raleway-Medium', sans-serif;
+}
+
+@font-face {
+    font-family: 'Raleway-Medium';
+    src: url('/static/fonts/Raleway-Medium.ttf') format('truetype');
+
+}
+
+body {
+    font-family: 'Raleway-Medium.', sans-serif;
 }
 
 .body{
@@ -129,6 +139,7 @@ input, select{
     border: 0.5px solid gray;
     border-radius: 5px;
     padding: 1.8px 8px;
+    text-transform: uppercase;
 }   
 
 button{
@@ -162,4 +173,60 @@ button{
     width: auto;
     color: #2F2E2E;
     text-decoration: none;
+}
+
+
+.edits{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    gap: 1rem;
+}
+
+
+.button_edit{
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    width: 1fr;
+    align-items: center;
+    text-align: center;
+}
+
+.botones_edit{
+    margin-top: 2rem;
+}
+
+#selected-symbol-edit{
+    width: 1fr;
+    margin: 1rem 0rem;
+    text-transform: uppercase;
+}
+
+.messages {
+    list-style: none;
+    padding: 0;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+
+.messages li {
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    display: inline-block;
+}
+
+.messages .success {
+  background-color: #28a745;
+}
+
+.messages .warning {
+  background-color: #ffc107;
 }

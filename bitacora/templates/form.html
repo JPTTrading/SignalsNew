@@ -21,6 +21,17 @@
   <a class="salida" href="{% url 'salir' %}" ><i class="fa-solid fa-person-running fa-xl"></i></a>
 
 
+  <!-- Mostrar los mensajes -->
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li class="{% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
 <div class="contenido">
   <div>
     <h4 class="nueva_entrada">New Input</h4>
@@ -30,12 +41,12 @@
 
         <div class="form">
           <label>Symbol</label>
-          <input type="text" name="SYMBOL" required>
+          <input type="text" name="symbol" required>
         </div>
 
         <div class="form">
           <label>Side</label>
-          <select name="SIDE" required>
+          <select name="side" required>
             <option value="">Choose...</option>
             <option>Buy</option>
             <option>Sell</option>
@@ -44,12 +55,12 @@
 
         <div class="form">
           <label>Entry price</label>
-          <input type="number" name="ENTRY" placeholder="$" step="0.01" required>
+          <input type="number" name="entry" placeholder="$" step="0.01" required>
         </div>
 
         <div class="form">
           <label>Type</label>
-          <select name="TYPE" required>
+          <select name="type" required>
             <option value="">Choose...</option>
             <option>Entry</option>
             <option>Partial Take</option>
@@ -62,15 +73,15 @@
       <div class="form-data">
         <div class="form">
           <label>Stoploss</label>
-          <input type="number" name="STOP_LOSS" placeholder="$" step="0.01">
+          <input type="number" name="stop_loss" placeholder="$" step="0.01">
         </div>
         <div class="form">
           <label>Proportion <span>(Optional)</span></label>
-          <input type="number" name="PORCENTAJE_EJECUTADO" placeholder="% 0.0" step="0.01" required>
+          <input type="number" name="porcentaje_ejecutado" placeholder="% 0.0" step="0.01" required>
         </div>
         <div class="form">
           <label>Target</label>
-          <input type="number" name="TARGET_PRICE" placeholder="$" step="0.01">
+          <input type="number" name="target_price" placeholder="$" step="0.01">
         </div>
         {% comment %} <div class="form">
           <label>Target 2 <span>(Optional)</span></label>
@@ -92,10 +103,10 @@
         {% for registro in reg %}
         <li>
           <div>
-            <h6>{{ registro.SYMBOL }}</h6>
-            <small>{{ registro.SIDE }}</small>
+            <h6>{{ registro.symbol }}</h6>
+            <small>{{ registro.side }}</small>
           </div>
-          <span>{{ registro.ENTRY }}</span>
+          <span>{{ registro.entry }}</span>
         </li>
         {% endfor %}
       </ul>
@@ -112,18 +123,18 @@
         <option value="">Choose...</option>
         {% for bitacora in bitacoras %}
               <option 
-      data-trade-date="{{ bitacora.TRADE_DATE }}"
-      data-trade-close="{{ bitacora.TRADE_CLOSE }}"
-      data-side="{{ bitacora.SIDE }}"
-      data-entry="{{ bitacora.ENTRY }}"
-      data-stop-loss="{{ bitacora.STOP_LOSS }}"
+      data-trade-date="{{ bitacora.trade_date }}"
+      data-trade-close="{{ bitacora.trade_close }}"
+      data-side="{{ bitacora.side }}"
+      data-entry="{{ bitacora.entry }}"
+      data-stop-loss="{{ bitacora.stop_loss }}"
 
-      data-target-price="{{ bitacora.TARGET_PRICE }}"
-      data-porcentaje-acumulado="{{ bitacora.PORCENTAJE_ACUMULADO }}"
-      data-porcentaje-ejecutado="{{ bitacora.PORCENTAJE_EJECUTADO }}"
-      value="{{ bitacora.SYMBOL }}"
+      data-target-price="{{ bitacora.target_price}}"
+      data-porcentaje-acumulado="{{ bitacora.porcentaje_acumulado }}"
+      data-porcentaje-ejecutado="{{ bitacora.porcentaje_ejecutado }}"
+      value="{{ bitacora.symbol }}"
     >
-      {{ bitacora.SYMBOL }}
+      {{ bitacora.symbol }}
     </option>
         {% endfor %}
       </select>
@@ -144,16 +155,16 @@
     <form id method="POST" action="{% url 'edit_stop' %}">
       {% csrf_token %}
     <div>
-      <input id="selected-symbol-edit" name="SYMBOL_EDIT">{{ Symbol }}</input>
+      <input id="selected-symbol-edit" name="symbol_edit">{{ Symbol }}</input>
     </div> 
       <label>Edit stop</label>
     <div class="edits">
-      <input  name="STOP_LOSS_EDIT" type="number" placeholder="$" step="0.01">
+      <input  name="stop_loss_edit" type="number" placeholder="$" step="0.01">
       <button class="button_edit" type="submit">edit stop</button>
     </div>
     <label>Edit target</label>
     <div class="edits">
-      <input name="TARGET_PRICE_EDIT" type="number" placeholder="$" step="0.01">
+      <input name="target_price_edit" type="number" placeholder="$" step="0.01">
       <button  class="button_edit" type="submit">edit target</button>
     </div>
   </form>
@@ -180,6 +191,13 @@
       var selectedOption = event.target.options[event.target.selectedIndex];
       document.querySelector('#selected-symbol-edit').value = selectedOption.value;
   });
+    // Ocultar los mensajes después de 5 segundos
+    setTimeout(function() {
+      var messages = document.querySelectorAll('.messages li');
+      messages.forEach(function(message) {
+        message.style.display = 'none';
+      });
+    }, 5000); 
   </script>
 
 </div>

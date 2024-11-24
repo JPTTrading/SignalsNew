@@ -11,10 +11,13 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from django.middleware.security import SecurityMiddleware
 import os
 from dotenv import load_dotenv
 import environ
 from whitenoise.middleware import WhiteNoiseMiddleware
+
+
 # Initialise environment variables
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,7 +49,8 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
-    'bitacora'
+    'bitacora',
+    'csp'
 ]
 
 MIDDLEWARE = [
@@ -63,8 +67,51 @@ MIDDLEWARE = [
     'django_plotly_dash.middleware.BaseMiddleware',
     'django_plotly_dash.middleware.ExternalRedirectionMiddleware',
 
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'bitacora.middleware.XFrameOptionsMiddleware',
+    # 'bitacora.middleware.IframeOnlyMiddleware',
+    'csp.middleware.CSPMiddleware'
 ]
+
+
+# Solo agregar el middleware en producción
+if not DEBUG:
+    MIDDLEWARE.append('bitacora.middleware.IframeOnlyMiddleware')
+
+#CSP_FRAME_ANCESTORS = ["'self'", "https://www.ttrading.co"]
+
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "https://cdn.jsdelivr.net",
+    "https://kit.fontawesome.com",
+    "https://unpkg.com",
+    "https://ka-f.fontawesome.com",
+    "https://www.ttrading.co"
+)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "https://cdn.jsdelivr.net",
+    "https://kit.fontawesome.com",
+    "https://unpkg.com",
+    "https://ka-f.fontawesome.com",
+    "https://www.ttrading.co"
+)
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+    "https://www.ttrading.co"
+)
+CSP_FRAME_SRC = (
+    "'self'",
+    "https://www.ttrading.co",
+    "https://www.ttrading.co/miembros-basico",
+    "https://www.ttrading.co/miembro-platinum"
+)
+
 
 ROOT_URLCONF = 'signals.urls'
 
@@ -95,17 +142,28 @@ SESSION_COOKIE_AGE = 10 * 60  # 10 minutos
 SESSION_SAVE_EVERY_REQUEST = True
 
 
+# DATABASES = {
+# "default": {
+# "ENGINE": "django.db.backends.postgresql_psycopg2",
+# "NAME": os.getenv('DATABASE_NAME_PRO'),
+# "USER": os.getenv('DATABASE_USER_PRO'),
+# "PASSWORD": os.getenv('DATABASE_PASS_PRO'),
+# "HOST": os.getenv('HOST_PRO'),
+# "PORT": "5432",
+# }
+# }
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv('DATABASE_NAME_PRO'),
-        "USER": os.getenv('DATABASE_USER_PRO'),
-        "PASSWORD": os.getenv('DATABASE_PASS_PRO'),
-        "HOST": os.getenv('HOST_PRO'),
+        "NAME": "ttrading",
+        "USER": "ttrading",
+        "PASSWORD": "Alej@ndr0",
+        "HOST": "160.238.36.130",
         "PORT": "5432",
     }
 }
-
 
 DIR_CACHE = BASE_DIR / 'cache'
 DIR_SESSIONS = BASE_DIR / 'sessions'

@@ -1,81 +1,101 @@
-
-*{
-    margin: 0;
-    padding: 0;
-    font-family: Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  font-family:'Raleway-Medium', sans-serif;
 }
-
-body{
-    background: #2F2E2E;
-}
-
-.row{
-
-    justify-content: center;
-    margin: 0;
-    padding: 2rem;
-}
-
-.logo{
-    padding: 1rem;
-    width: 6rem;
-    height: 6rem;
-    background-color: #2F2E2E;
-    margin: 0;
-    padding: 0;
+@font-face {
+  font-family: 'Raleway-Medium';
+  src: url('/static/fonts/Raleway-Medium.ttf') format('truetype');
 
 }
 
-
-.fondo{
-    padding: 1rem;
-    background: #2F2E2E;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
+/* Estilos generales */
+body {
+  background: #0C0C15;
+  font-family: 'Raleway-Medium', sans-serif;
 }
 
-.tabla{
-    justify-content: center;
-    
-
+.row {
+  justify-content: center;
+  margin: 0;
+  padding: 2rem;
 }
 
-.tabla_ejecucion{
-    justify-content: center;
-    margin: 0;
-    padding-left: 4rem;
-    padding-right: 4rem;
-    display: none;
+.logo {
+  padding: 1rem;
+  width: 6rem;
+  height: 6rem;
+  background-color: #0C0C15;
+  margin: 0;
 }
 
-.cambio{
-    position: absolute;
-    left: 80px;
-    top:60px;
-    height: 100px;
-    width: auto;
-    color: white;
-    text-decoration: none;
+.fondo {
+  padding: 1rem;
+  background: #0C0C15;
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
-
-.switch-container{
-    position: absolute;
-    right: 80px;
-    top:60px;
+.tabla {
+  justify-content: center;
 }
 
-.switch{
+.tabla_ejecucion {
+  justify-content: center;
+  margin: 0;
+  padding-left: 4rem;
+  padding-right: 4rem;
+  display: none;
+}
+
+.cambio {
+  position: absolute;
+  left: 80px;
+  top: 60px;
+  height: 100px;
+  width: auto;
+  color: white;
+  text-decoration: none;
+}
+
+.switch-container {
+  position: absolute;
+  right: 80px;
+  top: 60px;
+}
+
+.switch {
+  text-align: center;
+}
+
+.form-check-label {
+  margin: 0;
+  color: white;
+  font-size: medium;
+  font-weight: bold;
+}
+
+.rentabilidad-texto {
+  font-size: 20px;
+  margin-left: 48px;
+  color: white;
+}
+
+/* Media query para dispositivos móviles */
+@media (max-width: 768px) {
+  .logo {
+    position: relative;
+    display: block;
+    margin: auto;
+    padding-bottom: 1rem;
+  }
+
+  .switch-container {
+    position: relative;
+    display: block;
+    margin: auto;
+    padding-top: 1rem;
     text-align: center;
+  }
 }
-
-.form-check-label{
-    margin: 0;
-    color: white;
-    font-size: medium;
-    font-weight: bold;
-}
-
-

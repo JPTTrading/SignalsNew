@@ -1,19 +1,20 @@
 from django_plotly_dash import DjangoDash
-import dash
 from dash import html, Input, Output, dcc, State
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
-from dash.dash_table import DataTable, FormatTemplate
-from dash.dash_table.Format import Format
 from django.core.cache import cache
-import plotly.express as px
+from dash.dash_table import DataTable
 import pandas as pd
-from .views import convertir
-from datetime import date
-import yfinance as yf
+from .models import Bitacora_Principal, Historial_Bitacora
+from django.db.models import Sum
+
+trade_date = 'trade date'
+stop_loss = 'stop loss'
+target_price = 'target price'
+
 
 app = DjangoDash(name='bitacora_app', external_stylesheets=[
-                 dbc.themes.BOOTSTRAP])
+    dbc.themes.BOOTSTRAP])
 
 # Agregar el switch para filtrar posiciones abiertas y cerradas
 switch = dbc.CardGroup(
@@ -26,38 +27,42 @@ switch = dbc.CardGroup(
                 {"label": "Posiciones cerradas", "value": "closed"},
             ],
             value="open",
-            # inline=True,
         ),
     ],
     className='switch-container'
 )
 
 tabla_bitacora = [
-    dict(id='TRADE_DATE', name='TRADE DATE'),
-    dict(id='TRADE_CLOSE', name='TRADE CLOSE'),
-    dict(id='SYMBOL', name='SYMBOL'),
-    dict(id='PRICE', name='PRICE'),
-    dict(id='SIDE', name='SIDE'),
-    dict(id='ENTRY', name='ENTRY'),
-    dict(id='STOP_LOSS', name='STOP LOSS'),
-    dict(id='TARGET_PRICE', name='TARGET PRICE'),
-    dict(id='PORCENTAJE_ACUMULADO', name='% ' + 'LIVE'),
-    dict(id='GL', name='% ' + 'G/L'),
+    dict(id='trade_date', name=trade_date),
+    dict(id='trade_close', name='trade close'),
+    dict(id='symbol', name='symbol'),
+    dict(id='price', name='price'),
+    dict(id='side', name='side'),
+    dict(id='entry', name='entry'),
+    dict(id='stop_loss', name=stop_loss),
+    dict(id='target_price', name=target_price),
+    dict(id='porcentaje_acumulado', name='% ' + 'live'),
+    dict(id='gl', name='% ' + 'g/l'),
 ]
 
 tabla_ejecuciones = [
-    dict(id='TRADE_DATE', name='TRADE DATE', sort_by='asceding'),
-    dict(id='SYMBOL', name='SYMBOL'),
-    dict(id='SIDE', name='SIDE'),
-    dict(id='ENTRY', name='PRICE'),
-    dict(id='STOP_LOSS', name='STOP LOSS'),
-    dict(id='TARGET_PRICE', name='TARGET PRICE'),
-    dict(id='PROFIT', name='% ' + 'G/L'),
-    dict(id='PORCENTAJE_EJECUTADO', name='% ' + 'EXECUTE'),
+    dict(id='trade_date', name=trade_date, sort_by='asceding'),
+    dict(id='symbol', name='symbol'),
+    dict(id='side', name='side'),
+    dict(id='entry', name='entry'),
+    dict(id='stop_loss', name=stop_loss),
+    dict(id='target_price', name=target_price),
+    dict(id='profit', name='% ' + 'g/l'),
+    dict(id='porcentaje_ejecutado', name='% ' + 'executed'),
 ]
 
 header = dbc.Row(
     [html.Img(src='/static/img/logo_light.png', className="logo")])
+
+rentabilidad = html.Div(
+    id='rentabilidad',
+    className='rentabilidad-texto', 
+    )
 
 bitacora = dcc.Loading(
     type='circle',
@@ -66,7 +71,7 @@ bitacora = dcc.Loading(
     children=dbc.Row(
         [
             DataTable(
-                id='bit_data',  
+                id='bit_data',
                 columns=tabla_bitacora,
                 data=[],
                 style_header={
@@ -91,35 +96,35 @@ bitacora = dcc.Loading(
                     },
                     {
                         'if': {
-                            'filter_query': '{SIDE} = BUY  || {SIDE} = Buy',
-                            'column_id': 'SIDE'
+                            'filter_query': '{side} = Buy || {side} = Buy',
+                            'column_id': 'side'
                         },
                         'backgroundColor': 'green',
                         'color': 'white'
                     },
                     {
                         'if': {
-                            'filter_query': '{SIDE} = "SELL"  || {SIDE} = "Sell"',
-                            'column_id': 'SIDE'
+                            'filter_query': '{side} = "Sell"  || {side} = "Sell"',
+                            'column_id': 'side'
                         },
                         'backgroundColor': 'tomato',
                         'color': 'white'
                     },
                     {
                         'if': {
-                            'filter_query': '{GL} < 0',
-                            'column_id': 'GL'
+                            'filter_query': '{gl} < 0',
+                            'column_id': 'gl'
                         },
-                        'backgroundColor': 'tomato',
-                        'color': 'white'
+                        'backgroundColor': 'LightSalmon',
+                        'color': 'red'
                     },
                     {
                         'if': {
-                            'filter_query': '{GL} > 0',
-                            'column_id': 'GL'
+                            'filter_query': '{gl} > 0',
+                            'column_id': 'gl'
                         },
-                        'backgroundColor': 'green',
-                        'color': 'white'
+                        'backgroundColor': 'LightGreen',
+                        'color': 'green'
                     },
                     {
                         'if': {
@@ -170,34 +175,34 @@ ejecuciones = dcc.Loading(
                     },
                     {
                         'if': {
-                            'filter_query': '{SIDE} = BUY  || {SIDE} = Buy',
-                            'column_id': 'SIDE'
+                            'filter_query': '{side} = Buy  || {side} = Buy',
+                            'column_id': 'side'
                         },
                         'backgroundColor': 'green',
                         'color': 'white'
                     },
                     {
                         'if': {
-                            'filter_query': '{SIDE} = "SELL"  || {SIDE} = "Sell"',
-                            'column_id': 'SIDE'
+                            'filter_query': '{side} = "Sell"  || {side} = "Sell"',
+                            'column_id': 'side'
                         },
                         'backgroundColor': 'tomato',
                         'color': 'white'
                     },
                     {
                         'if': {
-                            'filter_query': '{GL} < 0',
-                            'column_id': 'PROFIT'
+                            'filter_query': '{gl} < 0',
+                            'column_id': 'profit'
                         },
-                        'backgroundColor': 'tomato',
+                        'backgroundColor': 'DarkSalmon',
                         'color': 'white'
                     },
                     {
                         'if': {
-                            'filter_query': '{GL} > 0',
-                            'column_id': 'PROFIT'
+                            'filter_query': '{gl} > 0',
+                            'column_id': 'profit'
                         },
-                        'backgroundColor': 'green',
+                        'backgroundColor': 'LightGreen',
                         'color': 'white'
                     },
                 ]
@@ -212,6 +217,7 @@ app.layout = html.Div(
     children=[
         header,
         switch,  # Añadir el switch al layout
+        rentabilidad,
         bitacora,
         ejecuciones,
         dcc.Location(id='url', refresh=False),
@@ -223,69 +229,122 @@ app.layout = html.Div(
     [
         Output(component_id='bit_data', component_property='data'),
         Output(component_id='bit_data', component_property='columns'),
+        Output(component_id='rentabilidad', component_property='children'),
+        Output(component_id='rentabilidad', component_property='style'),
     ],
-    Input(component_id='url', component_property='href'),
-    Input(component_id='switch-input', component_property='value'),
+    [
+        Input(component_id='url', component_property='href'),
+        Input(component_id='switch-input', component_property='value')
+    ],
     prevent_initial_call=True
 )
-def inicio_tabla(valor, switch_value):
-    df = cache.get('bit')
-    if df is None or not df:
+def inicio_tabla(href, switch_value):
+    try:
+        objs = obtener_datos_filtrados(switch_value)
+        df = crear_dataframe(objs)
+
+        if df.empty:
+            raise PreventUpdate
+
+        precios = cache.get('precios_symbols', {})
+        df = calcular_gl(df, precios)
+            
+        resultados, tabla_bitacora = procesar_resultados(df, switch_value)
+        rentabilidad_texto, rentabilidad_style = calcular_rentabilidad(resultados, switch_value)
+
+        return resultados.to_dict('records'), tabla_bitacora, rentabilidad_texto, rentabilidad_style
+    except Exception as e:
+        print(f"Error in callback: {e}")
         raise PreventUpdate
 
-    # Filtrar datos según el valor del switch
+# Función para filtrar los datos según el switch_value
+def obtener_datos_filtrados(switch_value):
     if switch_value == 'open':
-        df = [row for row in df if not row['TRADE_CLOSE']]
+        return Bitacora_Principal.objects.filter(trade_close__isnull=True).order_by('trade_date')
+    elif switch_value == 'closed':
+        return Bitacora_Principal.objects.filter(trade_close__isnull=False).order_by('trade_date') 
+    return Bitacora_Principal.objects.all().order_by('-trade_date')
+
+
+# Función para crear el DataFrame
+def crear_dataframe(objs):
+    resultados = [
+        {
+            'uuid': str(obj.uuid),
+            'trade_date': obj.trade_date.strftime('%d-%m-%Y'),
+            'trade_close': obj.trade_close,
+            'symbol': obj.symbol,
+            'side': obj.side,
+            'entry': obj.entry,
+            'stop_loss': obj.stop_loss,
+            'target_price': obj.target_price,
+            'porcentaje_acumulado': obj.porcentaje_acumulado,
+        }
+        for obj in objs
+    ]
+    return pd.DataFrame(resultados)
+
+
+# Función para calcular g/l
+def calcular_gl(df, precios):
+    for index, row in df.iterrows():
+        symbol = row['symbol']
+        price = precios.get(symbol, 'N/A')
+        df.at[index, 'price'] = price
+
+        if price != 'N/A':
+            entry = float(row['entry'])
+            if row['side'] == 'Buy':
+                df.at[index, 'gl'] = round(((price - entry) / entry) * 100, 2)
+            elif row['side'] == 'Sell':
+                df.at[index, 'gl'] = round(((entry - price) / entry) * 100, 2)
+        else:
+            df.at[index, 'gl'] = 0
+    return df
+
+
+# Función para procesar los resultados y la tabla
+def procesar_resultados(df, switch_value):
+    if switch_value == 'open':
+        resultados = df[df['trade_close'].isnull()]
         tabla_bitacora = [
-            dict(id='TRADE_DATE', name='TRADE DATE'),
-            dict(id='SYMBOL', name='SYMBOL'),
-            dict(id='PRICE', name='PRICE'),
-            dict(id='SIDE', name='SIDE'),
-            dict(id='ENTRY', name='ENTRY'),
-            dict(id='STOP_LOSS', name='STOP LOSS'),
-            dict(id='TARGET_PRICE', name='TARGET PRICE'),
-            dict(id='PORCENTAJE_ACUMULADO', name='% ' + 'LIVE'),
-            dict(id='GL', name='% ' + 'G/L'),
+            {'id': 'trade_date', 'name': 'trade_date'},
+            {'id': 'symbol', 'name': 'symbol'},
+            {'id': 'price', 'name': 'price'},
+            {'id': 'side', 'name': 'side'},
+            {'id': 'entry', 'name': 'entry'},
+            {'id': 'stop_loss', 'name': 'stop_loss'},
+            {'id': 'target_price', 'name': 'target_price'},
+            {'id': 'porcentaje_acumulado', 'name': '% ' + 'live'},
+            {'id': 'gl', 'name': '% ' + 'g/l'},
         ]
+    elif switch_value == 'closed':
+        resultados = df[df['trade_close'].notnull()]
+        tabla_bitacora = [
+            {'id': 'trade_date', 'name': 'trade_date'},
+            {'id': 'trade_close', 'name': 'trade_close'},
+            {'id': 'symbol', 'name': 'symbol'},
+            {'id': 'side', 'name': 'side'},
+            {'id': 'entry', 'name': 'entry'},
+            {'id': 'stop_loss', 'name': 'stop_loss'},
+            {'id': 'target_price', 'name': 'target_price'},
+            {'id': 'porcentaje_acumulado', 'name': '% ' + 'live'},
+        ]
+    return resultados, tabla_bitacora
+
+
+# Función para calcular la rentabilidad
+def calcular_rentabilidad(resultados, switch_value):
+    if switch_value == 'open':
+        rentabilidad = resultados['gl'].fillna(0).sum() if 'gl' in resultados.columns else 0
+        rentabilidad_texto = f"Rentabilidad Total: {rentabilidad:.2f}%"
+        rentabilidad_style = {'display': 'block'}
     else:
-        df = [row for row in df if row['TRADE_CLOSE']]
-        tabla_bitacora = [
-            dict(id='TRADE_DATE', name='TRADE DATE'),
-            dict(id='TRADE_CLOSE', name='TRADE CLOSE'),
-            dict(id='SYMBOL', name='SYMBOL'),
-            dict(id='SIDE', name='SIDE'),
-            dict(id='ENTRY', name='ENTRY'),
-            dict(id='STOP_LOSS', name='STOP LOSS'),
-            dict(id='TARGET_PRICE', name='TARGET PRICE'),
-            dict(id='PORCENTAJE_ACUMULADO', name='% ' + 'LIVE'),
-        ]
-
-    # Obtener los símbolos únicos de la bitácora
-    symbols = set(row['SYMBOL'] for row in df)
-
-    # Actualizar precios para cada símbolo
-    for symbol in symbols:
-        try:
-            ticker = yf.Ticker(symbol)
-            history = ticker.history(period="max")
-            ultimo_precio = round(history['Close'].iloc[-1], 2)
-        except Exception as e:
-            print(f"Error al obtener datos de Yahoo Finance: {e}")
-            data_yf = yf.download(symbol, period='1d')
-            ultimo_precio = round(data_yf['Close'].iloc[-1], 2)
-
-        for row in df:
-            if row['SYMBOL'] == symbol:
-                row['PRICE'] = ultimo_precio
-                row['ENTRY'] = pd.to_numeric(row['ENTRY'], errors='coerce')
-                if row['SIDE'] == "Buy":
-                    row['GL'] = round(
-                        (row['PRICE'] - row['ENTRY']) / row['ENTRY'] * 100, 2)
-                else:
-                    row['GL'] = round(
-                        (row['ENTRY'] - row['PRICE']) / row['ENTRY'] * 100, 2)
-
-    return df, tabla_bitacora
+        # Usar aggregate para obtener el total de profit
+        total_profit = Historial_Bitacora.objects.aggregate(total_profit=Sum('profit'))['total_profit']
+        rentabilidad_texto = f"Rentabilidad Total: {total_profit:.2f}%"
+        rentabilidad_style = {'display': 'block'}
+    return rentabilidad_texto, rentabilidad_style
 
 
 @app.callback(
@@ -299,51 +358,51 @@ def tabla_ejecuciones(active_cell, data):
     if active_cell is None:
         raise PreventUpdate
 
-    dfh = cache.get('his')
-    dfh = pd.DataFrame(dfh)
-    df = cache.get('bit')
-    df = pd.DataFrame(df)
+    uuid = data[active_cell['row']]['uuid']
+    objs_historial = Historial_Bitacora.objects.filter(bitacora_principal__uuid=uuid).order_by('trade_date')
 
-    if dfh is None or df is None:
+    # Crear una lista para almacenar los resultados individuales
+    resultados_historial = []
+
+    for obj_h in objs_historial:
+        # Crear un diccionario para cada objeto y agregar los atributos necesarios
+        dict_resultado_historial = {}
+        dict_resultado_historial['uuid'] = str(obj_h.bitacora_principal.uuid)
+        dict_resultado_historial['trade_date'] = obj_h.trade_date.strftime('%d-%m-%Y')
+        dict_resultado_historial['symbol'] = obj_h.symbol
+        dict_resultado_historial['side'] = obj_h.side
+        dict_resultado_historial['entry'] = str(obj_h.entry)  # Serializar Decimal a cadena si es necesario
+        dict_resultado_historial['stop_loss'] = str(obj_h.stop_loss)  # Serializar Decimal a cadena si es necesario
+        dict_resultado_historial['target_price'] = str(obj_h.target_price)  # Serializar Decimal a cadena si es necesario
+        dict_resultado_historial['profit'] = str(obj_h.profit)  # Serializar Decimal a cadena si es necesario
+        dict_resultado_historial['porcentaje_ejecutado'] = str(obj_h.porcentaje_ejecutado)  # Serializar Decimal a cadena si es necesario
+        # Agregar más atributos según sea necesario
+        resultados_historial.append(dict_resultado_historial)
+
+    # Convertir la lista de resultados a DataFrame de pandas
+    dfh = pd.DataFrame(resultados_historial)
+
+
+    if dfh.empty:
         raise PreventUpdate
 
-    selected_uuid = data[active_cell['row']]['UUID']
-    filtered_data = dfh[dfh['UUID'] == selected_uuid]
-    ejecuciones_style = {'display': 'block'} if not filtered_data.empty else {
-        'display': 'none'}
 
-    return filtered_data.to_dict('records'), ejecuciones_style
+    ejecuciones_style = {'display': 'block'} if not dfh.empty else {'display': 'none'}
+
+    # Devolver los datos y el estilo para la tabla de ejecuciones
+    return dfh.to_dict('records'), ejecuciones_style
 
 
-def actualizar_gl():
-    df_bitacora = cache.get('bit')
-    if df_bitacora is None or not df_bitacora:
-        raise PreventUpdate
 
-    # Filtrar solo las posiciones cerradas
-    df_bitacora_closed = [row for row in df_bitacora if row['TRADE_CLOSE']]
+def actualizar_gl(objeto):
+    # Lógica para calcular o actualizar el campo GL (ganancia/pérdida)
+    if objeto.price:
+        gl = (objeto.price - objeto.entry) / objeto.entry * 100
+        return f"{gl:.2f}%"
+    else:
+        return "N/A"
 
-    for row in df_bitacora_closed:
-        # Obtener el UUID de la posición cerrada
-        uuid_closed = row['UUID']
 
-        # Filtrar las ejecuciones asociadas a la posición cerrada
-        df_ejecuciones = cache.get('his')
-        if df_ejecuciones is None or not df_ejecuciones:
-            continue
-
-        df_ejecuciones = pd.DataFrame(df_ejecuciones)
-        df_ejecuciones_filtered = df_ejecuciones[df_ejecuciones['UUID'] == uuid_closed]
-
-        if not df_ejecuciones_filtered.empty and 'PROFIT' in df_ejecuciones_filtered:
-            # Obtener el último valor de la columna 'PROFIT' de las ejecuciones
-            last_profit = df_ejecuciones_filtered.iloc[-1]['PROFIT']
-
-            # Actualizar el valor de 'GL' en la bitácora con el último valor de 'PROFIT'
-            row['GL'] = last_profit
-
-    # Actualizar la cache
-    cache.set('bit', df_bitacora)
 
 
 if __name__ == '__main__':

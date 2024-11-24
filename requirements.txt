@@ -1,6 +1,7 @@
 amqp==5.2.0
 appdirs==1.4.4
 asgiref==3.8.1
+async-timeout==4.0.3
 beautifulsoup4==4.12.3
 billiard==4.2.0
 blinker==1.8.2
@@ -24,6 +25,7 @@ django-celery-beat==2.6.0
 django-environ==0.11.2
 django-plotly-dash==2.3.1
 django-timezone-field==6.1.0
+django_csp==3.8
 dpd_components==0.1.0
 Flask==3.0.3
 frozendict==2.4.4
@@ -53,6 +55,7 @@ six==1.16.0
 soupsieve==2.5
 sqlparse==0.5.0
 tenacity==8.3.0
+typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.1
 vine==5.1.0
